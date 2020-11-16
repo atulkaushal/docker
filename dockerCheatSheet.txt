@@ -48,3 +48,19 @@ docker build -f "testDockerWithJava" -t akaushal85/test-docker-with-java:1.0 "."
 
 Push it on docker hub
 docker push akaushal85/test-docker-with-java
+
+CMD["command","param1","param2"] // for instance CMD["java","Main","HelloWorld"] will be treated as java Main HelloWorld.
+
+ENTRYPOINT from where execution starts when container starts.
+Entry point can be entered in Dockerfile or at command line while starting container.
+
+docker run --entrypoint ENTRYPOINT_NAME ImageName
+
+Networks:
+Bridge: its internal within container.
+None: containers cannot attached to any network.(Islolated)
+host: map the ports to host network.
+
+docker network ls //list all networks
+
+docker volume create VolumeName//create volume
