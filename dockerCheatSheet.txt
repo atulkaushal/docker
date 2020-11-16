@@ -1,0 +1,50 @@
+Image: Package template
+Container: Running instance of Image
+
+docker version //list version of docker.
+docker pull docker/whalesay // pulls the image.
+
+docker run --name NAMEOFCONTAINER IMAGENAME
+
+docker run ImageName//start a container if image exists otherwise download image and start container. If you are not specifying version then the latest image of will get downloaded.
+docker run ImageName:latest //same as previous command. Here,latest is the version.
+docker run redis:4.0//instructs docker to download and run redis version 4.0. To check versions, go to docker hub and check tags associated with images.
+docker run -it ImageName// 
+-i is for interactive mode 
+-t is for terminal of your machine
+-p for mapping ports. For instance, 80:5000 port 5000 of docker container is mapped to port 80 of local machine. You can run multiple instances and map them to different ports.
+-v for mounting the local machine directory to docker container directory. Local machine directory will be used to save date.
+-e for passing environment variables.
+
+docker ps //list all running containers
+docker ps -a // list all running and stopped containers
+
+
+docker stop ContainerID/ContainerName //provide container ID or Name to stop container.
+
+docker rm ContainerName //removes a container. Prints container name if successful.
+
+docker images //list all the images with sizes
+
+docker rmi ImageName//removes image. Stop and delete all dependent containers first to remove image.
+docker rmi ImageName:version//to remove specific version image.
+
+docker run -d docker/whalesay //download the image if it does not exists. Run the container in detached mode. Command will print the id of the container.In detached mode, you will be able to use same console. 
+
+docker attach containerID //to link the container back to console.
+
+docker inspect ContainerID/ContainerName //to get detailed information like port, mounts,environment variables (under config) etc. about container.
+
+docker logs ContainerID/ContainerName // lists log of container
+
+Create your own docker image:
+
+Create a file with name as Dockerfile.
+Build your docker image file 
+docker build Dockerfile -t akaushal85/test-docker-with-java
+
+You can also specify docker file name using -f option.
+docker build -f "testDockerWithJava" -t akaushal85/test-docker-with-java:1.0 "."
+
+Push it on docker hub
+docker push akaushal85/test-docker-with-java
