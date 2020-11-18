@@ -9,12 +9,15 @@ docker run --name NAMEOFCONTAINER IMAGENAME
 docker run ImageName//start a container if image exists otherwise download image and start container. If you are not specifying version then the latest image of will get downloaded.
 docker run ImageName:latest //same as previous command. Here,latest is the version.
 docker run redis:4.0//instructs docker to download and run redis version 4.0. To check versions, go to docker hub and check tags associated with images.
-docker run -it ImageName// 
+docker run -it ImageName
 -i is for interactive mode 
 -t is for terminal of your machine
 -p for mapping ports. For instance, 80:5000 port 5000 of docker container is mapped to port 80 of local machine. You can run multiple instances and map them to different ports.
 -v for mounting the local machine directory to docker container directory. Local machine directory will be used to save date.
 -e for passing environment variables.
+-H for specifying remote-docker-engine:port
+--cpus for specifying % of cpu allocation.
+--memory for specifying the memory allocation.
 
 docker ps //list all running containers
 docker ps -a // list all running and stopped containers
@@ -56,11 +59,85 @@ Entry point can be entered in Dockerfile or at command line while starting conta
 
 docker run --entrypoint ENTRYPOINT_NAME ImageName
 
-Networks:
+Networks drivers:
 Bridge: its internal within container.
 None: containers cannot attached to any network.(Islolated)
 host: map the ports to host network.
 
 docker network ls //list all networks
 
-docker volume create VolumeName//create volume
+docker network inspect bridge //list details of network like subnet etc.
+
+docker run --network=none ImageName //associate network with container.
+
+docker network create --driver bridge --subnet 182.18.0.1/24 --gateway 182.18.0.1 wp-mysql-network //creating subnet.
+
+docker volume create VolumeName//create volume. Volume mounting
+
+docker run -v /data/mysql:/var/lib/mysql mysql //if you have another location to store data then provide full path. Bind mounting.
+
+mount option can be used to mount directories.
+docker run --mount type=bind,source=/data/mysql,target=/var/lib/mysql mysql
+
+DOCKER COMPOSE:
+docker run -d --name=redis redis
+docker run -d --name=db postgres:9.4
+docker run -d --name=vote -p 5000:80 voting-app
+docker run -d --name=result -p 5001:80
+docker run -d --name=worker worker
+
+These components are individually deployed and does not know how to communicate with each other. 
+To resolve this issue we need to use 'link'(deprecated). Mapping the container name to placeholders.
+
+docker run -d --name=worker worker --link db:db --link redis:redis worker
+
+It would be difficult to maintain them separately. Solution to this docker compose(provide details in a single yaml file).
+Above commands can be replaced by docker-compose.yaml file.
+
+redis:
+  image: redis
+db:
+  image: postgres:9.4
+vote:
+  image: voting-app
+  ports:
+    - 5000:80
+  links:
+    - redis
+result:
+  image: result-app
+  ports:
+    - 5001:80
+  links:
+    - db
+worker:
+  image: worker
+  links:
+    - redis
+    - db
+
+if images for apps are not available then you can specify the path of directory where docker build file is present for appliation.
+for instance, if voting-app image is not available then you can specify it as
+
+vote:
+  build: ./voting-app
+  ports:
+    - 5000:80
+  links:
+    - redis
+
+./voting-app is the path where Dockerfile is present for voting-app.
+
+depends_on if you want some services to start first then starting current service.
+
+Docker Swarm:
+-Collection/cluster of docker hosts.
+-One of the host is manager, others are secondary/slave nodes.
+
+Swarm manager:
+    docker swarm init
+
+Node worker:
+    docker swarm join --token <token>
+
+docker service create --replicas=4 my-web-server //this will be executed on manager node. It will create 4 instances of my-web-server on worker nodes.
